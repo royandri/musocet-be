@@ -33,23 +33,16 @@ export class ServerSocket {
   }
 
   StartListeners = (socket: Socket) => {
-    console.info('Message received from ' + socket.id);
-
     socket.on('handshake', (callback: (uid: string, users: User[]) => void) => {
         const userId = socket.handshake.query.userId;
-        console.info('Handshake received from: ' + socket.id);
-
         const reconnected = Object.values(this.users).some((user) => user.socketId === socket.id);
 
         if (reconnected) {
-            console.info('This user has reconnected.');
-
             const uid = this.GetUidFromSocketID(socket.id);
 
             const users = Object.values(this.users);
 
             if (uid) {
-                console.info('Sending callback for reconnect ...');
                 callback(uid, users);
                 return;
             }
@@ -75,7 +68,6 @@ export class ServerSocket {
         }
 
         const users = Object.values(this.users);
-        console.info('Sending callback ...');
         callback(uid, users);
 
         this.SendMessage(
@@ -86,8 +78,6 @@ export class ServerSocket {
     });
 
     socket.on('disconnect', () => {
-        console.info('Disconnect received from: ' + socket.id);
-
         const uid = this.GetUidFromSocketID(socket.id);
 
         if (uid) {
@@ -127,7 +117,6 @@ export class ServerSocket {
   };
 
   SendMessage = (name: string, users: User[], payload?: Object) => {
-      console.info('Emitting event: ' + name + ' to', users);
       users.forEach((user) => (payload ? this.io.to(user.socketId).emit(name, payload) : this.io.to(user.socketId).emit(name)));
   };
 

@@ -2,7 +2,7 @@
   "name": "musocet-be",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.ts",
+  "main": "index.ts",
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
