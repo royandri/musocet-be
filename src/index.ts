@@ -62,4 +62,4 @@ application.use((req, res, next) => {
 
 
 /** Listen */
-httpServer.listen(process.env.NODE_ENV === "production" ? 8080 : 5000, () => console.info(`Server is running`));
+httpServer.listen(process.env.PORT || 5000, () => console.info(`Server is running`));
