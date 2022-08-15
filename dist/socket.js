@@ -6,7 +6,7 @@ const uuid_1 = require("uuid");
 class ServerSocket {
     constructor(server) {
         this.StartListeners = (socket) => {
-            socket.on('handshake', (callback) => {
+            socket.on("handshake", (callback) => {
                 var _a;
                 const userId = socket.handshake.query.userId;
                 const reconnected = Object.values(this.users).some((user) => user.socketId === socket.id);
@@ -31,35 +31,36 @@ class ServerSocket {
                             socketId: socket.id,
                             userId: uid,
                             name: "",
+                            score: 0,
                         } });
                 }
                 const users = Object.values(this.users);
                 callback(uid, users);
-                this.SendMessage('user_connected', users.filter((user) => user.socketId !== socket.id), users);
+                this.SendMessage("user_connected", users.filter((user) => user.socketId !== socket.id), users);
             });
-            socket.on('disconnect', () => {
+            socket.on("disconnect", () => {
                 const uid = this.GetUidFromSocketID(socket.id);
                 if (uid) {
                     delete this.users[uid];
                     const users = Object.values(this.users);
-                    this.SendMessage('user_disconnected', users, uid);
+                    this.SendMessage("user_disconnected", users, uid);
                 }
             });
             socket.on("set_name", (data) => {
                 if (this.users[data.userId]) {
                     this.users[data.userId].name = data.name;
                     const users = Object.values(this.users);
-                    this.SendMessage('user_setname', users, {
+                    this.SendMessage("user_setname", users, {
                         users: users,
                         userId: data.userId,
-                        name: data.name
+                        name: data.name,
                     });
                 }
             });
             socket.on("push_bell", (data) => {
                 if (this.users[data.userId]) {
                     const users = Object.values(this.users);
-                    this.SendMessage('user_push_bell', users, {
+                    this.SendMessage("user_push_bell", users, {
                         users: users,
                         userId: data.userId,
                     });
@@ -70,7 +71,9 @@ class ServerSocket {
             return Object.keys(this.users).find((uid) => this.users[uid].socketId === id);
         };
         this.SendMessage = (name, users, payload) => {
-            users.forEach((user) => (payload ? this.io.to(user.socketId).emit(name, payload) : this.io.to(user.socketId).emit(name)));
+            users.forEach((user) => payload
+                ? this.io.to(user.socketId).emit(name, payload)
+                : this.io.to(user.socketId).emit(name));
         };
         this.SendSingleMessage = (name, userId, payload) => {
             payload
@@ -80,13 +83,22 @@ class ServerSocket {
         this.SetSong = (position, status) => {
             this.io.emit("set_song", JSON.stringify({
                 position: position,
-                status: status
+                status: status,
             }));
         };
         this.ControlSong = (status) => {
             this.io.emit("control_song", JSON.stringify({
-                status: status
+                status: status,
             }));
+        };
+        this.SetScore = (userId, score) => {
+            this.users[userId].score += score;
+            const users = Object.values(this.users);
+            this.io.to(this.users[userId].socketId).emit("set_score", {
+                userId: userId,
+                users: users,
+                score: this.users[userId].score,
+            });
         };
         ServerSocket.instance = this;
         this.users = {};
@@ -96,10 +108,10 @@ class ServerSocket {
             pingTimeout: 5000,
             cookie: false,
             cors: {
-                origin: '*'
-            }
+                origin: "*",
+            },
         });
-        this.io.on('connect', this.StartListeners);
+        this.io.on("connect", this.StartListeners);
         console.log("Socket IO started.");
     }
 }
