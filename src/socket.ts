@@ -148,7 +148,7 @@ export class ServerSocket {
 
   ControlSong = (status: string) => {
     this.io.emit(
-      "control_song",
+      "user_control_song",
       JSON.stringify({
         status: status,
       })
