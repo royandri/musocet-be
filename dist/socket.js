@@ -94,11 +94,11 @@ class ServerSocket {
         this.SetScore = (userId, score) => {
             this.users[userId].score += score;
             const users = Object.values(this.users);
-            this.io.to(this.users[userId].socketId).emit("set_score", {
+            this.io.emit("set_score", JSON.stringify({
                 userId: userId,
                 users: users,
                 score: this.users[userId].score,
-            });
+            }));
         };
         ServerSocket.instance = this;
         this.users = {};
